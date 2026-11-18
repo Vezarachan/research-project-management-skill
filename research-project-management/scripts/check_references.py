@@ -619,7 +619,8 @@ def main():
                 cache.pop(e["ID"], None)
             cache[e["ID"] + "#latest"] = res
     try:
-        cache_path.write_text(json.dumps({k: v for k, v in cache.items() if not k.endswith("#latest")}, indent=0))
+        if todo:   # nothing verified -> leave no cache file behind
+            cache_path.write_text(json.dumps({k: v for k, v in cache.items() if not k.endswith("#latest")}, indent=0))
     except OSError:
         pass
 

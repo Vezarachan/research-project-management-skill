@@ -48,4 +48,4 @@ fi
 if have git; then ok "git"; else missing "git" "needed for the public code/ folder and check_release.py: xcode-select --install"; fi
 if have latexmk; then ok "latexmk"; else missing "latexmk (optional)" "compiling manuscripts locally (MacTeX / TeX Live)"; fi
 echo
-echo "Open a NEW Claude Code session to load the skill. See README.md to get started."
+echo "Open a NEW Claude Code session to load the skill. See README.md (English) or README.zh-CN.md (中文)."

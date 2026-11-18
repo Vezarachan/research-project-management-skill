@@ -70,7 +70,7 @@ the venue history.
 5. **Bump**: rename the living files to `_vN+1` (main and supplement), update the header comment
    of both (`% Manuscript vN+1, living draft for <venue>; previous: versions/vNN-…`), run
    `latexmk -c` for the old build files, and update every place that names the file: project
-   `CLAUDE.md` (Manuscript section), `PROJECT.md` pointers, `NUMBERS.md`, any scripts that
+   `AGENTS.md` (Manuscript section), `PROJECT.md` pointers, `NUMBERS.md`, any scripts that
    hard-code the name (the template `sync_figures.sh` globs, so it needs no change).
 6. Never edit inside `versions/`.
 
@@ -85,7 +85,7 @@ Every round is a **pair** — the comments file and a response file with the sam
   comments file. Rejection letters are kept too: `<VENUE>-decision-comments.md`, and the lessons
   carried over are written into the venue history.
 - Response files answer every comment ID with *done / changed / disagree* + where (section,
-  line, figure) — ARS `/ars-revision-coach` can draft the skeleton and response letter; this
+  line, figure) — where installed, ARS `/ars-revision-coach` can draft the skeleton and response letter; this
   skill owns the file layout.
 - Close a round = response complete → snapshot (`internal-R<k>` or `resubmitted-R<k>`) → bump.
 - Optional companion files (e.g. `R1-agent-tasks.md`) use the same prefix so the round stays
@@ -100,7 +100,7 @@ Every round is a **pair** — the comments file and a response file with the sam
    new one from `assets/VENUE.template.md`.
 4. Work through the VENUE.md checklist: document class and template, length limits (words,
    pages, figures, tables, abstract), keywords, section order, reference style (.bst), anonymity,
-   required statements (data/code availability, AI-use disclosure via ARS `/ars-disclosure`,
+   required statements (data/code availability, AI-use disclosure (ARS `/ars-disclosure` where installed),
    funding, conflicts, contributions), figure overrides of the house standard (font, panel
    letter case, formats), extra items (cover letter, highlights, graphical abstract).
 5. Name everything for the new venue from here on: next snapshot `vNN-<NEWVENUE>-…`, journal

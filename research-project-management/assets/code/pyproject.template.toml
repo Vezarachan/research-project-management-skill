@@ -3,18 +3,19 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "{{pkg}}"
+name = "{{PKG}}"
 version = "0.1.0"
-description = "{{One sentence: what the method does, for which decisions}}"
+description = "{{ONE_LINE_DESCRIPTION}}"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "{{LICENSE_NAME}}"}
 requires-python = ">=3.10"
-# the method's minimal dependencies only; requirements.txt pins everything used for the paper
-dependencies = ["numpy", "pandas"]
+# the method's minimal dependencies only (set at init from what the method imports);
+# requirements.txt pins everything used for the paper
+dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["{{pkg}}*", "paperfigs*"]
+include = ["{{PKG}}*", "paperfigs*"]

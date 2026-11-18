@@ -1,0 +1,2 @@
+# Exact versions used for the paper (tested with Python {{PYTHON_VERSION}}).
+# Keep it current: after installing a package, add it here with its version (pip freeze | grep <name>).

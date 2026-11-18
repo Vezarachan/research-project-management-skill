@@ -35,7 +35,7 @@ single wrong line publishes experiment cards, reviews or data.
 | Throwaway exploration nobody depends on | `experiments/EXP-NNN-name/scratch/` (private). Promote it into `code/` the moment a reported result depends on it |
 | Outputs of scripts (csv, logs, checkpoints) | private `experiments/EXP-NNN-name/`, via `paths.out_dir()` |
 | Manuscript figures | private `figures/`, via `paths.fig_dir()` |
-| CARD.md, PROJECT.md, CLAUDE.md, MANIFEST.md, tex, bib, reviews, Affinity sources, slides, drafts | never in `code/` |
+| CARD.md, PROJECT.md, AGENTS.md, CLAUDE.md, MANIFEST.md, tex, bib, reviews, Affinity sources, slides, drafts | never in `code/` |
 | Project page and online supplement (final versions only) | `code/docs/`; drafts and slides stay in the private project |
 
 The experiment directory has the same name on both sides (`code/experiments/EXP-003-flood/` ↔
@@ -64,21 +64,26 @@ break for everyone else and identify the author during anonymous review. All pat
 `src/paperfigs/paths.py` (template `assets/code/paths.py`):
 
 ```python
-from paperfigs.paths import data_dir, out_dir, fig_dir, experiment_name
-OUT = out_dir(experiment_name(__file__))   # -> $<PKG>_OUT/EXP-003-flood/
-CARAVAN = data_dir("caravan")              # -> $<PKG>_DATA/caravan
+from paperfigs.paths import data_dir, out_dir, cache_dir, fig_dir, experiment_name
+EXP = experiment_name(__file__)            # 'EXP-003-flood'
+OUT = out_dir(EXP)                         # -> $<PKG>_OUT/EXP-003-flood/    small: tables, logs, metrics
+CKPT = cache_dir(EXP) / "model.pt"         # -> $<PKG>_CACHE/EXP-003-flood/  large: checkpoints, weights
+CARAVAN = data_dir("caravan")              # -> $<PKG>_DATA/caravan          raw data
 fig.savefig(fig_dir() / "fig_flood-results.pdf")
 ```
 
-Defaults are repo-relative (`code/data/`, `code/out/`, both git-ignored), so a fresh clone runs.
-The private project overrides them in `env.sh` (template `assets/code/env.sh`), which it sources
-before running anything:
+Defaults are repo-relative (`code/data/`, `code/out/`, `code/cache/`, all git-ignored), so a fresh
+clone runs. The private project overrides them in `env.sh` (template `assets/code/env.sh`),
+sourced from the project root before running anything (`source env.sh`):
 
-```bash
-export GEOCRC_DATA="$HOME/data/geocrc"                 # raw data, local disk
-export GEOCRC_OUT="<project>/experiments"                                  # outputs land beside each CARD.md
-export GEOCRC_FIGURES="<project>/figures"
-```
+- `<PKG>_OUT` and `<PKG>_FIGURES` are derived from the folder it is sourced in, so they are right
+  on every machine the project syncs to;
+- `<PKG>_DATA` (one data root, each dataset a subfolder) and `<PKG>_CACHE` sit in one block per
+  machine, keyed by `hostname -s`, on local or external, unsynced disks. The block also notes
+  where that machine keeps the git store. A new machine = a new block; an unmounted data disk
+  is reported when sourcing.
+
+Large artefacts never go to `<PKG>_OUT`: it is the private `experiments/` folder on synced storage.
 
 Install the code once into the project's environment: `pip install -e code/`.
 
@@ -113,7 +118,7 @@ It checks the files git would publish (tracked + untracked not ignored):
 
 | Level | Finding |
 |---|---|
-| FAIL | private file type (CARD/PROJECT/CLAUDE/MANIFEST.md, .tex, .bib, .afdesign, .pptx, .env, keys); file > 25 MB; secret/token patterns; machine paths (`/Users/<name>`, `/home/<name>`, Drive/Dropbox/OneDrive paths); Python syntax errors; in `--anonymous` mode, any identity term (from git config, the remote owner and `--names`) in a file name or text |
+| FAIL | private file type (CARD/PROJECT/AGENTS/CLAUDE/MANIFEST.md, .tex, .bib, .afdesign, .pptx, .env, keys); file > 25 MB; secret/token patterns; machine paths (`/Users/<name>`, `/home/<name>`, Drive/Dropbox/OneDrive paths); Python syntax errors; in `--anonymous` mode, any identity term (from git config, the remote owner and `--names`) in a file name or text |
 | WARN | file > 5 MB; data/model formats (.tif, .nc, .pth, .parquet …) > 1 MB; personal default paths (`Path.home() / "…"`, `~/…`); paths escaping the repo (`../../`); notebooks with stored outputs; draft/backup/scratch names; non-web files in `docs/`; experiment folders missing from the README reproduction table; missing README/LICENSE/requirements/.gitignore; e-mail addresses |
 
 Run it before every push that matters, and always before a snapshot that leaves your hands.

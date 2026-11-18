@@ -1,6 +1,8 @@
 ---
 name: research-project-management
 description: Keep GeoAI / scientific research projects lean, structured and consistent as they grow — project scaffolding, one-page experiment cards, a size-capped PROJECT.md, a public code/ folder that is the GitHub repo, a house figure and caption standard (Aptos, AAG print sizes, checked by script), a reference audit that catches fabricated or retracted citations, and LaTeX manuscript versioning across revision rounds and venue switches. Use this skill whenever the user starts or initializes a research project, runs a checkpoint / session wrap-up, logs an experiment, tidies or audits a messy project, prepares code for GitHub or an anonymous mirror, makes or checks figures or captions, adds or checks references, snapshots a manuscript, submits or resubmits a paper, gets reviews back, or switches journal/conference — and whenever they mention PROJECT.md, 实验卡, 项目整理, 收尾, checkpoint, 代码开源, 作图规范, 图注, 参考文献, 引用核查, 稿件版本, 返修, 投稿, or 换期刊 in a research context.
+license: MIT
+compatibility: Agent Skills standard; written for Claude Code (project files are agent-neutral, Codex support planned). Scripts need Python 3; figure checks need ghostscript; code release needs git; reference audit needs network access.
 ---
 
 # Research Project Management
@@ -17,6 +19,20 @@ fixed size budget — so token cost and cognitive load stay constant however lon
 
 Information flows downward: when `PROJECT.md` would exceed its cap, demote finished or stale
 content into cards or the archive index — never just delete it, never let the cap slip.
+
+## Agent-neutral project files
+
+This skill follows the open Agent Skills format and is installed for Claude Code in
+`~/.claude/skills/`. Everything it creates in a project is agent-neutral, so other agents
+(e.g. Codex, which reads `AGENTS.md`) can work in the same project:
+- Project rules go in **`AGENTS.md`** (Codex reads it natively). `CLAUDE.md` is a one-line
+  `@AGENTS.md` import, so Claude Code loads the same rules. Edit only `AGENTS.md`.
+- The check scripts and the reference files are copied into the project's **`tools/`** and
+  **`tools/references/`** at init, so rules and commands never depend on where (or whether) an
+  agent installed the skill (`python3 tools/check_figures.py …`). Run them from the project root.
+  Outside a project, use this skill's `scripts/` and `references/`.
+- Companion skills named below (nature-figure, ARS) are optional: use them where installed,
+  otherwise follow the reference files of this skill directly.
 
 ## Modes
 
@@ -37,7 +53,9 @@ content into cards or the archive index — never just delete it, never let the 
 ```
 <project>/
 ├── PROJECT.md            # living state, ≤150 lines (assets/PROJECT.template.md)
-├── CLAUDE.md             # standing rules for every session (assets/CLAUDE.template.md)
+├── AGENTS.md             # standing rules for every session, any agent (assets/AGENTS.template.md)
+├── CLAUDE.md             # one line: @AGENTS.md (assets/CLAUDE.template.md)
+├── tools/                # copies of this skill's scripts/ (check_figures, check_references, ...)
 ├── env.sh                # this machine's data/output paths for the public scripts (assets/code/env.sh)
 ├── data/
 │   ├── MANIFEST.md       # registry of ALL datasets (assets/MANIFEST.template.md)
@@ -65,39 +83,73 @@ content into cards or the archive index — never just delete it, never let the 
 ```
 
 Boundary rules that do most of the anti-clutter work — enforce them and explain when violated:
-- **`code/` is public as a whole; nothing private enters it.** No cards, PROJECT/CLAUDE/MANIFEST,
+- **`code/` is public as a whole; nothing private enters it.** No cards, PROJECT/AGENTS/CLAUDE/MANIFEST,
   tex/bib, reviews, drafts, slides, data or outputs. This replaces any whitelist `.gitignore`.
 - **All code lives in `code/`**: every script whose output is reported (a card, figure, table or
   number) in `code/experiments/EXP-NNN-name/`; throwaway exploration in the private
   `experiments/EXP-NNN-name/scratch/` until a reported result depends on it, then promote it.
   Nothing lives in the project root.
 - **`code/src/<package>/` never depends on a specific experiment** — no hardcoded EXP paths or constants.
-- **No machine paths in `code/`.** Scripts get data, output and figure paths from
-  `paperfigs/paths.py`; the private `env.sh` points them at the local data root,
-  `experiments/` and `figures/`.
-- **Large geodata** (rasters, point clouds, weights) is never copied into the project (it sits on
-  synced Google Drive); register it in `data/MANIFEST.md` with location, format, CRS,
-  resolution, temporal extent, source, size.
+- **No machine paths in `code/`.** Scripts get their paths from `paperfigs/paths.py`; the
+  private `env.sh` (one block per machine) points them at the data root, `experiments/`
+  (small outputs), a local cache (large artefacts) and `figures/`.
+- **Nothing large enters the project folder**, which typically lives on synced storage:
+  raw geodata (rasters, point clouds) stays in the data root and is registered in
+  `data/MANIFEST.md` (location, status, format, CRS, resolution, temporal extent, source,
+  licence, size); checkpoints, weights and big intermediates go to `cache_dir()`.
 - **Exactly one living manuscript** (`01_main_vN.tex`); older states exist only as snapshots.
 
 ## Mode: init
 
-1. Ask for (or infer): project name, research question, data sources, first target venue, the
-   Python package name of the method, the GitHub repo name, and a local unsynced path for raw data.
-2. Create the structure above.
-3. Instantiate from `assets/`: `PROJECT.md`, `CLAUDE.md`, `data/MANIFEST.md`, `archive/INDEX.md`,
-   `manuscript/versions/INDEX.md` (VERSIONS-INDEX template), `manuscript/VENUE.md`, the LaTeX
-   skeletons and `sync_figures.sh` from `assets/manuscript/`.
-4. Instantiate `code/` from `assets/code/`: `README.md`, `.gitignore` (from `gitignore.template`),
-   `pyproject.toml`, `src/<package>/__init__.py`, `src/paperfigs/{__init__,paths,plotstyle}.py`,
-   empty `experiments/ examples/ docs/` (with `docs/.nojekyll`), and the private `env.sh` at the
-   project root with absolute paths filled in. Ask which licence (default MIT) before adding `LICENSE`.
-5. Offer to set up git (`references/code-release.md` §2): `git init --separate-git-dir=<local
-   unsynced path>` inside `code/`, so repository data never sits on the synced drive. Creating the
-   GitHub repository and pushing are the user's call — never push without being asked.
-6. The generated `CLAUDE.md` enforces the conventions in sessions where this skill does not
-   trigger. Keep it under ~80 lines; it is loaded every session.
-7. Fill known manifest rows and the venue now rather than leaving them empty.
+1. Ask for (or infer) what the templates need: project name (folder), title (only if the user
+   has one), research question, data sources, target venue, the method's Python package name,
+   the GitHub repo name, the author block (name, e-mail, affiliation), and, on this machine, a
+   **data root** (one local/external folder that holds every dataset as a subfolder), a
+   **cache root** (local, unsynced; for checkpoints and big intermediates) and, if git is wanted,
+   a **git store** path (local, unsynced). Never put any of these three on the synced drive.
+2. Create the structure above. Do **not** create EXP-001 — the first experiment (usually the
+   baseline the research question compares against) goes in Next Steps.
+3. Instantiate from `assets/`: `PROJECT.md`, `AGENTS.md` (the rules) and `CLAUDE.md` (the
+   one-line import), `data/MANIFEST.md`, `archive/INDEX.md`, `manuscript/versions/INDEX.md`
+   (VERSIONS-INDEX template), `manuscript/VENUE.md`, the LaTeX skeletons and `sync_figures.sh`
+   from `assets/manuscript/`. Copy this skill's `scripts/` into `tools/` and `references/` into
+   `tools/references/`. The LaTeX skeleton is elsarticle (Elsevier); if the venue uses another
+   class, swap the class and front matter now, or leave a `TODO` in `VENUE.md`.
+4. Instantiate `code/` from `assets/code/`: `README.md`, `.gitignore` (`gitignore.template`),
+   `pyproject.toml`, `requirements.txt` (`requirements.template.txt`), `LICENSE`
+   (`LICENSE.template` is MIT; for another licence use its official text, e.g. from
+   choosealicense.com, and set the same name in `pyproject.toml`; holder = the author unless the
+   user says review is double-anonymous, then "The <repo> authors"), `src/<package>/__init__.py`,
+   `src/paperfigs/{__init__,paths,plotstyle}.py`, a `.gitkeep` in `experiments/` and `examples/`
+   (git does not keep empty folders) and `docs/.nojekyll`. Write the private `env.sh` at the
+   project root with this machine's block filled in; create the cache root and git store folders.
+5. **Placeholders.** Templates use `{{UPPER_SNAKE}}` for values set at init — replace every one;
+   where the value is not known yet, write `TODO: <what>` instead. Existing `TODO:` markers are
+   prose the researcher writes later; leave them. Meanings: `PROJECT_NAME` folder name ·
+   `PROJECT_TITLE` paper title, else the project name · `PKG` / `PKG_UPPER` package name ·
+   `VENUE` short venue code used in file names (e.g. RSE) · `VENUE_FULL_NAME` · `AUTHOR_NAME`,
+   `AUTHOR_EMAIL`, `AFFILIATION` · `HOSTNAME` = `hostname -s` · `DATA_ROOT`, `CACHE_ROOT` ·
+   `GIT_STORE` full path of the store, `<parent>/<repo>.git` · `PYTHON_VERSION` of the project's
+   environment (`python3 --version`) · `ONE_LINE_DESCRIPTION` from the user's own words ·
+   `REPO_URL`, `MIRROR_URL` ("not yet" if none) · `LICENSE_NAME`, `COPYRIGHT_HOLDER`, `YEAR` ·
+   `DATE` today · `N` 1. Check nothing is left:
+   `grep -rnE '\{\{[A-Z][A-Z0-9_]*\}\}' .` must print nothing (`\graphicspath{{figures/}}` is LaTeX,
+   not a placeholder).
+6. **Do not invent content.** Write the title, keywords or abstract only from what the user gave.
+   Fill `VENUE.md` from the venue's author guidelines (look them up); if the page cannot be
+   fetched, ask the user to paste them or leave every item `TODO` with the guidelines URL. Manifest metadata that cannot be verified (disk not mounted, not downloaded yet)
+   gets status `to check` / `planned`, never a guess.
+7. Offer to set up git (`references/code-release.md` §2): `git init --separate-git-dir=<git store>`
+   inside `code/`. Before any commit, check `git config user.name` / `user.email`; if unset,
+   ask the user (a GitHub noreply address is a good default) and set them for this repository.
+   Initial commit message: "Initial project skeleton (research-project-management)".
+   Add the `origin` remote only when the user gives its URL. An initial local commit of the
+   skeleton is fine once identity is set; creating the GitHub repository and pushing are the
+   user's call — never push without being asked.
+8. Finish with `python3 tools/check_release.py code/` (expect 0 FAIL) and report what was
+   created and every `TODO` left for the user.
+9. The generated `AGENTS.md` enforces the conventions in sessions where this skill does not
+   trigger, whichever agent runs them. Keep it under ~80 lines; it is loaded every session.
 
 ## Mode: checkpoint
 
@@ -126,9 +178,10 @@ needs another look, and flagging it beats a vague card.
 
 Read `references/figure-standard.md` before making, editing or reviewing any manuscript figure
 or caption. In brief:
-- Code figures: invoke the **nature-figure** skill, telling it up front *Python backend* and that
-  the house standard overrides its defaults (Aptos not Arial, 84/180 mm, panel heading style);
-  scripts live in `code/experiments/EXP-…/`, use `paperfigs.plotstyle` and save via `paths.fig_dir()`.
+- Code figures: scripts live in `code/experiments/EXP-…/`, use `paperfigs.plotstyle` and save
+  via `paths.fig_dir()`. Where the **nature-figure** skill is installed, use it for the figure
+  design, telling it up front *Python backend* and that the house standard overrides its
+  defaults (Aptos not Arial, 84/180 mm, panel heading style).
 - Affinity figures: document width = printed width (84 or 180 mm), so sizes are literal.
 - File names: `fig_<topic>` / `figS_<topic>` (tables `tab_` / `tabS_`), lowercase hyphen-joined
   words, one stem for .pdf/.png/`src/*.afdesign`/label `fig:<topic>`. No figure numbers (LaTeX
@@ -139,7 +192,7 @@ or caption. In brief:
   settings and units given; a `% source:` comment above each figure.
 - Verify with `python3 scripts/check_figures.py <tex or figure files>` (exit 1 on fail); export
   submission TIFFs with `scripts/export_submission_figures.sh <Surname> <dir> figs…`.
-  Paths are relative to this skill's directory.
+  Inside a project run the copies in `tools/`; elsewhere, this skill's `scripts/`.
 
 ## References (mode: references)
 
@@ -179,10 +232,10 @@ Read `references/manuscript-versioning.md` before either mode. In brief:
   round, submission, resubmission, acceptance — freeze it as
   `versions/vNN-<VENUE>-<event>-<date>/` (tex, PDF, bib, tables, VENUE.md; plus figures when it
   leaves your hands), add an INDEX row, then **rename the living files to vN+1** and update every
-  reference to the file name (project CLAUDE.md, PROJECT.md, NUMBERS.md).
+  reference to the file name (project AGENTS.md, PROJECT.md, NUMBERS.md).
 - Review rounds are pairs: internal `R<k>-comments.md` ↔ `R<k>-response.md` (numbered across the
   project); journal `<VENUE>-R<k>-…`. Closing a round = response complete → snapshot → bump.
-  ARS `/ars-revision-coach` can draft response content; this skill owns the files.
+  Where installed, ARS `/ars-revision-coach` can draft response content; this skill owns the files.
 - Venue switch: snapshot if the text moved, record the outcome and lessons in the INDEX venue
   history, bump, replace `VENUE.md` from the template, then work through its checklist (class,
   limits, anonymity, reference style, statements, figure overrides). N never resets.
@@ -226,6 +279,7 @@ For an existing messy project — slower and more careful than init:
    For code, separate what is public (method, reproduction scripts, page) into `code/` and keep
    cards, outputs and scratch private; if the project root is already a git repo with a whitelist
    `.gitignore`, propose moving its work tree to `code/` (keeping the history) rather than starting over.
+   If the rules live in `CLAUDE.md` only, move them into `AGENTS.md` and leave `@AGENTS.md` in `CLAUDE.md`.
 3. Present a migration plan; get confirmation **before moving anything**.
 4. Execute, then run a checkpoint to establish the baseline `PROJECT.md`.
 
@@ -239,9 +293,10 @@ For an existing messy project — slower and more careful than init:
 - `scripts/check_references.py` — reference audit and `--lookup` (standard library, public APIs)
 - `scripts/check_release.py` — pre-push check of `code/` (private files, secrets, paths, anonymity)
 - `scripts/export_submission_figures.sh` — CMYK 600 dpi TIFFs named `<Surname>Figure<N>.tif`
-- `assets/` — PROJECT, CARD, CLAUDE, MANIFEST, INDEX, VERSIONS-INDEX, VENUE templates;
+- `assets/` — PROJECT, CARD, AGENTS, CLAUDE (import stub), MANIFEST, INDEX, VERSIONS-INDEX, VENUE templates;
   `manuscript/` LaTeX skeletons (`01_main_v1.tex`, `01_supplementary_v1.tex`, `02_references.bib`) and `sync_figures.sh`;
-  `code/` README, gitignore, pyproject templates, `paths.py`, `plotstyle.py`, private `env.sh`
+  `code/` README, gitignore, pyproject, requirements and LICENSE templates, `paths.py`,
+  `plotstyle.py`, private `env.sh`
 
 All project documents are written in **English** (they feed directly into manuscripts);
 converse with the user in whatever language they use.

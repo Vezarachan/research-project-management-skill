@@ -4,6 +4,6 @@
 # Run after regenerating a figure:  sh sync_figures.sh
 cd "$(dirname "$0")" || exit 1
 mkdir -p figures
-for f in $(grep -ho 'includegraphics\[[^]]*\]{[^}]*}\|includegraphics{[^}]*}' 01_*_v*.tex | sed 's/.*{\(.*\)}/\1/' | sort -u); do
+for f in $(sed -e 's/\([^\\]\)%.*/\1/' -e 's/^%.*//' 01_*_v*.tex | grep -o 'includegraphics\[[^]]*\]{[^}]*}\|includegraphics{[^}]*}' | sed 's/.*{\(.*\)}/\1/' | sort -u); do
   if [ -f "../figures/$f" ]; then cp -p "../figures/$f" "figures/$f" && echo "copied $f"; else echo "MISSING ../figures/$f"; fi
 done

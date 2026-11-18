@@ -30,6 +30,8 @@ _Last checkpoint: {{DATE}}_
 ## Pointers
 <!-- Stable references only: manuscript draft, key figures, data manifest,
      external resources (overleaf, dataset portals, compute). One line each. -->
+- Manuscript: `manuscript/01_main_v1.tex` (target venue: `manuscript/VENUE.md`)
 - Data registry: `data/MANIFEST.md`
-- Code: `code/` (GitHub: {{repo URL}}; anonymous mirror during review: {{URL}}; run `source env.sh` first)
+- Code: `code/` (GitHub: {{REPO_URL}}; anonymous mirror during review: {{MIRROR_URL}}; run `source env.sh` from the project root first)
+- Git store of `code/` (off the synced drive), per machine: see `env.sh`
 - Archive index: `archive/INDEX.md`

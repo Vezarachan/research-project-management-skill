@@ -4,6 +4,7 @@
 # default data and output roots (see src/paperfigs/paths.py)
 /data/
 /out/
+/cache/
 
 # Python
 __pycache__/

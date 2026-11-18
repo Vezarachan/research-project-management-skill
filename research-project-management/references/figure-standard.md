@@ -17,7 +17,7 @@ A venue's own rules override this file only where they conflict; record the over
 
 ## 1. Workflow
 
-- **Code figures** (plots, maps from data): generate with the **nature-figure** skill, Python
+- **Code figures** (plots, maps from data): where the **nature-figure** skill is installed, use it, Python
   backend. When invoking it, say "Python" up front (it otherwise stops to ask) and hand it this
   contract: house values below override its defaults (font Aptos, not Arial; widths 84/180 mm;
   panel heading style). Scripts live in `code/experiments/EXP-…/` and import

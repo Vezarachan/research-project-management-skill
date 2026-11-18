@@ -21,7 +21,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-PRIVATE_NAMES = {"CARD.md", "PROJECT.md", "CLAUDE.md", "MANIFEST.md", "NUMBERS.md", "VENUE.md",
+PRIVATE_NAMES = {"CARD.md", "PROJECT.md", "CLAUDE.md", "AGENTS.md", "MANIFEST.md", "NUMBERS.md", "VENUE.md",
                  ".env", "env.sh", "id_rsa", "id_ed25519"}
 PRIVATE_EXT = {".tex", ".bib", ".afdesign", ".afphoto", ".pptx", ".docx", ".key", ".pem", ".p12"}
 DATA_EXT = {".tif", ".tiff", ".nc", ".h5", ".hdf5", ".pth", ".pt", ".ckpt", ".safetensors", ".npy", ".npz",
