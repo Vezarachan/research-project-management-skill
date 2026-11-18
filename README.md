@@ -1,6 +1,6 @@
 # research-project-management · 科研项目管理 skill
 
-**版本** 1.1（2026-11-18） · **作者** Xiayin Lou（TUM） · **适用** Claude Code（终端 / 桌面 app / IDE）
+**版本** 1.1（2026-11-18） · **作者** Xiayin Lou（TUM） · **适用** Claude Code（终端 / 桌面 app / IDE） · **许可证** [MIT](LICENSE)
 
 让 GeoAI 及相关科研项目在长期使用 Claude Code 的过程中**始终保持精简、一致、可追溯**：
 代码、实验、数据、作图、参考文献、稿件版本、开源代码都有固定的位置、命名和检查。
@@ -42,6 +42,7 @@
 ```
 research-project-management-v1.1/
 ├── README.md                      ← 本说明
+├── LICENSE                        ← MIT
 ├── install.sh                     ← 一键安装 + 依赖检查
 ├── research-project-management.skill   ← claude.ai 网页版用的安装包
 └── research-project-management/   ← skill 本体（安装时整个复制到 ~/.claude/skills/）
