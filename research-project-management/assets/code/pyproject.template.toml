@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{pkg}}"
+version = "0.1.0"
+description = "{{One sentence: what the method does, for which decisions}}"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+# the method's minimal dependencies only; requirements.txt pins everything used for the paper
+dependencies = ["numpy", "pandas"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["{{pkg}}*", "paperfigs*"]

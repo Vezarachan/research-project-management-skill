@@ -1,0 +1,87 @@
+% Manuscript v1, living draft for {{VENUE}}. Previous version: none.
+% Figures are read from ./figures, copies of ../figures (refresh with: sh sync_figures.sh); each figure
+% has a "% source:" comment naming its file, generating script and CARD.
+% Every number in the text comes from an experiment output (NUMBERS.md, if kept, lists the source of each).
+% \pending{...} marks statements still to be checked.
+\documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+\textheight24cm
+\textwidth15.5cm
+\oddsidemargin0.25cm
+\topmargin-1.8cm
+
+\usepackage{graphicx}
+\usepackage{lineno}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{float}
+\usepackage{url}
+\def\UrlBreaks{\do\/\do-}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage{booktabs,tabularx}
+\usepackage{bm}
+
+\usepackage[section]{placeins}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.72}
+\setcounter{topnumber}{2}
+\setcounter{totalnumber}{3}
+
+\usepackage[x11names]{xcolor}
+\usepackage[colorlinks]{hyperref}
+\AtBeginDocument{\hypersetup{citecolor=DodgerBlue4,linkcolor=DodgerBlue4,urlcolor=DodgerBlue4}}
+
+\graphicspath{{figures/}}
+\newcommand{\pending}[1]{\textcolor{orange!80!black}{#1}}
+% Panel reference in captions; change this one line if a venue wants "a" or "(A)".
+\newcommand{\panel}[1]{\textbf{(#1)}~}
+
+\journal{{{VENUE_FULL_NAME}}}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{{{TITLE}}}
+
+% Author block (comment out for double-anonymous review):
+\author[a]{{{AUTHOR_NAME}}}
+\ead{{{AUTHOR_EMAIL}}}
+\address[a]{{{AFFILIATION}}}
+
+\begin{abstract}
+{{ABSTRACT}}
+\end{abstract}
+
+\begin{keyword}
+{{k1}} \sep {{k2}} \sep {{k3}}
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+\section{Introduction}\label{sec:intro}
+
+% source: figures/fig_concept.pdf <- Affinity Designer (figures/src/fig_concept.afdesign) (CARD: none, schematic)
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{fig_concept.pdf}
+\caption{{{One-sentence claim of the figure.}}
+\panel{a}{{What panel a shows; settings (period, region, parameters); symbol keys as term, meaning; ...}}
+\panel{b}{{...}}}
+\label{fig:concept}
+\end{figure}
+
+\section{Conclusion}\label{sec:conclusion}
+
+\section*{Data and code availability}
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{02_references}
+
+\end{document}

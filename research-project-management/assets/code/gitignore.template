@@ -1,0 +1,25 @@
+# code/ is public as a whole; only generated and local files are ignored here.
+# Private project material never enters code/ in the first place.
+
+# default data and output roots (see src/paperfigs/paths.py)
+/data/
+/out/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# local environment
+.env
+.venv/
+venv/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
